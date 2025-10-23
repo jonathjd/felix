@@ -1,0 +1,17 @@
+[project]
+name = "Felix"
+version = "0.1.0"
+description = "CLI tool to parse genes and associated diseases from PMC articles"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "biopython>=1.85",
+    "en-ner-bc5cdr-md",
+    "loguru>=0.7.3",
+    "lxml>=6.0.2",
+    "ruff>=0.14.0",
+    "scispacy>=0.6.2",
+]
+
+[tool.uv.sources]
+en-ner-bc5cdr-md = { url = "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz" }
