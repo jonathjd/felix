@@ -3,7 +3,7 @@ name = "Felix"
 version = "0.1.0"
 description = "CLI tool to parse genes and associated diseases from PMC articles"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "biopython>=1.85",
     "en-ner-bc5cdr-md",
