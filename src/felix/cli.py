@@ -1,9 +1,12 @@
 import argparse
-import sys
-from pathlib import Path
-from parser import Document, NLPAnalysis
 import csv
+from pathlib import Path
+import sys
+
 from loguru import logger
+
+from felix.parser import Document, NLPAnalysis
+from felix.validators import validate_email, validate_pmc_id
 
 OUTPUT_HEADER = [
     "chrom",
@@ -24,9 +27,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="A CLI tool to extract genes and associated metadata from publically available pubmed articles"
     )
-    parser.add_argument("--pmc_id", "-pid", required=True, help="The PMC ID of the article (e.g. PMC11127317).")
+    parser.add_argument("--pmc_id", "-pid", required=True, help="The PMC ID of the article (e.g. PMC1312717).")
     parser.add_argument("--email", "-e", required=True, help="Email for NCBI Entrez.")
-    parser.add_argument("--output", "-o", required=True, help="File to write results to.")
+    parser.add_argument("--output", "-o", help="File to write results to. Writes to stdout if omitted.")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -37,7 +40,11 @@ def main():
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    document = Document(args.pmc_id, args.email)  # verifies args, fetches and parses article
+    # validate inputs
+    validate_pmc_id(args.pmc_id)
+    validate_email(args.email)
+
+    document = Document(args.pmc_id, args.email)
     analysis = NLPAnalysis()
     records = analysis.extract_genes_and_diseases(document)
     metadata = analysis.fetch_gene_metadata(records)

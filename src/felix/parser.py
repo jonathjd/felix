@@ -1,11 +1,12 @@
-from typing import List, Tuple, Any
-from Bio import Entrez
-import xml.etree.ElementTree as ET
+from collections import defaultdict
 import re
-import spacy
+from typing import Any
+import xml.etree.ElementTree as ET
+
+from Bio import Entrez
 from loguru import logger
 import requests
-from collections import defaultdict
+import spacy
 
 
 class Document:
@@ -16,9 +17,6 @@ class Document:
         self.email = email
         self.raw_pmc_id = pmc_id.upper()
 
-        # validate inputs
-        self.validate()
-
         self.numeric_pmc_id = int(self.raw_pmc_id.removeprefix("PMC"))
 
         self._xml_content = self.fetch_pmc_xml()
@@ -27,25 +25,6 @@ class Document:
 
         if self._pmc_title:
             logger.info(f"PMC Article Title {self._pmc_title}")
-
-    def validate(self):
-        self.validate_email()
-        self.validate_pmc_id()
-
-    def validate_pmc_id(self):
-        if not all(char in self.VALID_PMC_ID_CHARS for char in self.raw_pmc_id):
-            raise ValueError(f"Invalid characters in PMC ID: {self.raw_pmc_id}")
-        if self.raw_pmc_id.startswith("PMC") and not self.raw_pmc_id[3:].isdigit():
-            raise ValueError(f"PMC ID is incorrectly formatted: {self.raw_pmc_id}")
-        if not self.raw_pmc_id.startswith("PMC") and not all(char.isdigit() for char in self.raw_pmc_id):
-            raise ValueError(f"PMC ID is incorrectly formatted: {self.raw_pmc_id}")
-        logger.info(f"PMC ID is valid! {self.raw_pmc_id}")
-        return
-
-    def validate_email(self):
-        if not self.EMAIL_RE.fullmatch(self.email):
-            raise ValueError(f"Invalid email format: {self.email}")
-        logger.info(f"Email is valid! {self.email}")
 
     def fetch_pmc_xml(self) -> str:
         Entrez.email = self.email
@@ -75,7 +54,7 @@ class Document:
         logger.warning(f"Article title not found for PMC {self.numeric_pmc_id}")
         return None
 
-    def xml_to_paragraphs(self) -> List[str]:
+    def xml_to_paragraphs(self) -> list[str]:
         root = ET.fromstring(self._xml_content)
         paras = []
         for p in root.findall(".//body//p"):
@@ -97,7 +76,7 @@ class Document:
         return f"Document(pmc_id='{self.raw_pmc_id}', paragraphs={len(self)})"
 
     @property
-    def paragraphs(self) -> List[str]:
+    def paragraphs(self) -> list[str]:
         return self._xml_paragraphs
 
     @property
@@ -118,7 +97,7 @@ class NLPAnalysis:
     MYGENE_QUERY = "https://mygene.info/v3/query"
     MYGENE_FIELDS = ["symbol", "name", "alias", "genomic_pos", "genomic_pos_hg19", "ensembl.gene"]
 
-    def extract_genes_and_diseases(self, text: Document | List[str] | str) -> List[Tuple[str, str]]:
+    def extract_genes_and_diseases(self, text: Document | list[str] | str) -> list[tuple[str, str]]:
         """Extract genes with HGNC IDs and associated diseases from XML."""
         match text:
             case list():
@@ -151,7 +130,7 @@ class NLPAnalysis:
                 results.append((hgnc_id, ""))
         return results
 
-    def fetch_gene_metadata(self, records: List[Tuple[str, str]], timeout: int = 10) -> List[Tuple[Any]]:
+    def fetch_gene_metadata(self, records: list[tuple[str, str]], timeout: int = 10) -> list[tuple[Any]]:
         res = []
         for record in records:
             hgnc_id, disease = record
