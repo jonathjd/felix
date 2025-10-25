@@ -1,5 +1,7 @@
-# Felix Overview
-This program takes in a PMC ID in the format `PMC#######`, an email, and an output file path and does the following.
+# Felix
+![Tests](https://github.com/jonathjd/felix/actions/workflows/tests.yaml/badge.svg)
+
+A scientific Named Entity Recogntiion (NER) program
 
 1. Validates that the PMC ID and email are correctly formatted.
 2. Uses Biopython to fetch the PMC article XML.
