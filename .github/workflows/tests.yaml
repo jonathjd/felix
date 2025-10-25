@@ -10,22 +10,22 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.13']
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v1 # Use the official setup-uv action
+        uses: astral-sh/setup-uv@v3 
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install dependencies and run tox
         run: |
-          uv venv .venv && source .venv/bin/activate
+          uv venv .venv
+          source .venv/bin/activate
           uv sync
           uv pip install tox tox-gh-actions
-      - name: Test with tox
-        run: tox
+          tox
